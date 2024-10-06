@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Turmas</title>
+    <link rel="stylesheet" href="final01.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <!-- jsPDF Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- jsPDF AutoTable Plugin (para tabelas) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <!-- Seção de Criação de Turmas -->
+    <div id="turma-container">
+        <h1>Gerenciamento de Turmas</h1>
+        <input type="text" id="nome-turma" placeholder="Nome da Turma">
+        <button id="criar-turma">Criar Turma</button>
+        <div id="turmas"></div>
+    </div>
+
+    <!-- Seção de Lista de Turmas -->
+    <div id="aluno-container" style="display:none;">
+        <h2 id="nome-da-turma"></h2>
+        <input type="text" id="nome-aluno" placeholder="Nome do Aluno">
+        <button id="adicionar-aluno">Adicionar Aluno</button>
+        <ul id="lista-alunos"></ul>
+
+        <button id="voltar-turmas">Voltar às Turmas</button>
+        <button id="calcular-ranking">Calcular Ranking</button>
+        <button id="resetar-pontos">Resetar Pontos</button>
+        <button id="resetar-feedbacks">Resetar Feedbacks</button>
+        <button id="exportarHistoricoPDF">Exportar Histórico de Ranking e Comportamentos em PDF</button>
+        <canvas id="grafico-aluno" width="400" height="200"></canvas>
+
+        <!-- Seção para mostrar o Ranking -->
+        <div id="resultado-ranking"></div>
+        <!-- Seção para mostrar o Modais -->
+        <div id="mostrar-comportamentos"></div>
+
+    </div>  
+
+   
+
+    <!-- Modais para cada tipo de comportamento -->
+    <!-- Modal para Comportamentos Positivos -->
+    <div id="modal-positivo" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-positivo')">&times;</span>
+            <h3>Selecione o comportamento (Positivo)</h3>
+            <div>
+                <input type="checkbox" id="positivo1" value="Demonstra um profundo entendimento do conteúdo">
+                <label for="positivo1">Demonstra um profundo entendimento do conteúdo</label><br>
+                <input type="checkbox" id="positivo2" value="Aplica o conhecimento de forma criativa e inovadora">
+                <label for="positivo2">Aplica o conhecimento de forma criativa e inovadora</label><br>
+                <input type="checkbox" id="positivo3" value="Realiza pesquisas aprofundadas">
+                <label for="positivo3">Realiza pesquisas aprofundadas</label><br>
+                <input type="checkbox" id="positivo4" value="Participa ativamente das atividades">
+                <label for="positivo4">Participa ativamente das atividades</label><br>
+                <input type="checkbox" id="positivo5" value="É um líder positivo em sala de aula">
+                <label for="positivo5">É um líder positivo em sala de aula</label><br>
+                <input type="checkbox" id="positivo6" value="Inspira seus colegas e evolui constantemente">
+                <label for="positivo6">Inspira seus colegas e evolui constantemente</label><br>
+                <input type="checkbox" id="positivo7" value="Demonstra bom domínio do conteúdo">
+                <label for="positivo7">Demonstra bom domínio do conteúdo</label><br>
+                <input type="checkbox" id="positivo8" value="Aplica o conhecimento em diferentes situações">
+                <label for="positivo8">Aplica o conhecimento em diferentes situações</label><br>
+                <input type="checkbox" id="positivo9" value="Demonstra habilidades de pesquisa e análise">
+                <label for="positivo9">Demonstra habilidades de pesquisa e análise</label><br>
+                <input type="checkbox" id="positivo10" value="Evolui de forma significativa ao longo do processo de aprendizagem">
+                <label for="positivo10">Evolui de forma significativa ao longo do processo de aprendizagem</label><br>
+                <!-- Adicione mais checkboxes conforme necessário -->
+            </div>
+            <button onclick="salvarSelecao('Positivo')">Salvar</button> 
+            <button onclick="limparSelecao('positivo')">Limpar Seleção</button>
+         </div>
+    </div>    
+
+    <!-- Modal para Comportamentos Leves -->
+    <div id="modal-leve" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-leve')">&times;</span>
+            <h3>Selecione o comportamento (Leve)</h3>
+            <div>
+                <input type="checkbox" id="leve1" value="Pouca participação nas atividades">
+                <label for="leve1">Pouca participação nas atividades</label><br>
+                <input type="checkbox" id="leve2" value="Dificuldade em compreender o conteúdo">
+                <label for="leve2">Dificuldade em compreender o conteúdo</label><br>
+                <input type="checkbox" id="leve3" value="Participação razoável nas atividades">
+                <label for="leve3">Participação razoável nas atividades</label><br>
+                <input type="checkbox" id="leve4" value="Demonstra um conhecimento básico do conteúdo">
+                <label for="leve4">Demonstra um conhecimento básico do conteúdo</label><br>
+                <input type="checkbox" id="leve5" value="Cumpre pouco com as tarefas propostas">
+                <label for="leve5">Cumpre pouco com as tarefas propostas</label><br>
+                <input type="checkbox" id="leve6" value="Apresenta dificuldades em algumas atividades mais complexas">
+                <label for="leve6">Apresenta dificuldades em algumas atividades mais complexas</label><br>
+                <input type="checkbox" id="leve7" value="Não cumprir prazos">
+                <label for="leve7">Não cumprir prazos</label><br>
+                <input type="checkbox" id="leve8" value="Não traz material">
+                <label for="leve8">Não traz material</label><br>
+                <input type="checkbox" id="leve9" value="Não realiza leitura">
+                <label for="leve9">Não realiza leitura</label><br>
+                <input type="checkbox" id="leve10" value="Não faz atividades">
+                <label for="leve10">Não faz atividades</label><br>
+                <input type="checkbox" id="leve11" value="Não entrega a atividade">
+                <label for="leve11">Não entrega a atividade</label><br>
+                <input type="checkbox" id="leve12" value="Falta de atenção">
+                <label for="leve12">Falta de atenção</label><br>
+                <input type="checkbox" id="leve13" value="Distração">
+                <label for="leve13">Distração</label><br>
+                <input type="checkbox" id="leve14" value="Conversas paralelas">
+                <label for="leve14">Conversas paralelas</label><br>
+                <input type="checkbox" id="leve15" value="Não prestar atenção em explicações">
+                <label for="leve15">Não prestar atenção em explicações</label><br>
+                <input type="checkbox" id="leve16" value="Interromper colegas">
+                <label for="leve16">Interromper colegas</label><br>
+                <input type="checkbox" id="leve17" value="Fica andando pela sala">
+                <label for="leve17">Fica andando pela sala</label><br>
+                <input type="checkbox" id="leve18" value="Não entregou a atividade">
+                <label for="leve18">Não entregou a atividade</label><br>
+                <input type="checkbox" id="leve19" value="Entregou a atividade atrasada">
+                <label for="leve19">Entregou a atividade atrasada</label><br>
+                <input type="checkbox" id="leve20" value="Não entrou na plataforma">
+                <label for="leve20">Não entrou na plataforma</label><br>
+                <!-- Adicione mais checkboxes conforme necessário -->
+            </div>
+            <button onclick="salvarSelecao('Leve')">Salvar</button>
+            <button onclick="limparSelecao('leve')">Limpar Seleção</button>
+        </div>
+    </div>
+
+    <!-- Modal para Comportamentos Moderados -->
+    <div id="modal-moderado" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-moderado')">&times;</span>
+            <h3>Selecione o comportamento (Moderado)</h3>
+            <div>
+                <input type="checkbox" id="moderado1" value="Desrespeito verbal">
+                <label for="moderado1">Desrespeito verbal</label><br>
+                <input type="checkbox" id="moderado2" value="Desobediência a regras básicas">
+                <label for="moderado2">Desobediência a regras básicas</label><br>
+                <input type="checkbox" id="moderado3" value="Usar linguagem ofensiva">
+                <label for="moderado3">Usar linguagem ofensiva</label><br>
+                <input type="checkbox" id="moderado4" value="Jogar objetos">
+                <label for="moderado4">Jogar objetos</label><br>
+                <input type="checkbox" id="moderado5" value="Bagunça">
+                <label for="moderado5">Bagunça</label><br>
+                <input type="checkbox" id="moderado6" value="Desrespeito aos colegas">
+                <label for="moderado6">Desrespeito aos colegass</label><br>
+                <input type="checkbox" id="moderado7" value="Uso inadequado do celular: Jogo">
+                <label for="moderado7">Uso inadequado do celular: Jogo</label><br>
+                <input type="checkbox" id="moderado" value="Uso inadequado do celular: Site de aposta">
+                <label for="moderado8">Uso inadequado do celular: Site de aposta</label><br>
+                <!-- Adicione mais checkboxes conforme necessário -->
+            </div>
+            <button onclick="salvarSelecao('Moderado')">Salvar</button>
+            <button onclick="limparSelecao('moderado')">Limpar Seleção</button>
+        </div>
+    </div>
+
+    <!-- Modal para Comportamentos Graves -->
+    <div id="modal-grave" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-grave')">&times;</span>
+            <h3>Selecione o comportamento (Grave)</h3>
+            <div>
+                <input type="checkbox" id="grave1" value="Não entrega das atividades propostas">
+                <label for="grave1">Não entrega das atividades propostas</label><br>
+                <input type="checkbox" id="grave2" value="Agressão física">
+                <label for="grave2">Agressão física</label><br>
+                <input type="checkbox" id="grave3" value="Agressão verbal">
+                <label for="grave3">Agressão verbal</label><br>
+                <input type="checkbox" id="grave4" value="Danos ao patrimônio">
+                <label for="grave4">Danos ao patrimônio</label><br>
+                <input type="checkbox" id="grave5" value="Bullying">
+                <label for="grave5">Bullying</label><br>
+                <input type="checkbox" id="grave6" value="Bater em colegas">
+                <label for="grave6">Bater em colegas</label><br>
+                <input type="checkbox" id="grave7" value="Xingar">
+                <label for="grave7">Xingar</label><br>
+                <input type="checkbox" id="grave8" value="Quebrar objetos">
+                <label for="grave8">Quebrar objetos</label><br>
+                <input type="checkbox" id="grave9" value="Atitudes que coloquem em risco a segurança de si mesmo ou dos outros e ameaças">
+                <label for="grave9">Atitudes que coloquem em risco a segurança de si mesmo ou dos outros e ameaças</label><br>
+                <input type="checkbox" id="grave10" value="Porte de objetos cortantes">
+                <label for="grave10">Porte de objetos cortantes</label><br>
+                <input type="checkbox" id="grave11" value="Uso de drogas">
+                <label for="grave11">Uso de drogas</label><br>
+                <!-- Adicione mais checkboxes conforme necessário -->
+            </div>
+            <button onclick="salvarSelecao('grave')">Salvar</button>
+            <button onclick="limparSelecao('grave')">Limpar Seleção</button>
+        </div>
+    </div>
+    
+    <script src="final01.js"></script>
+    
+</body>
+</html>
